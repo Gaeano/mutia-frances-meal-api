@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Menu List</title>
+    <style>
+
+        table {
+            border-collapse: collapse;
+            width: 50%;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .controls {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Menu</h1>
+
+    
+    <div class="controls">
+        <button onclick="loadMenu()">Load Full Menu</button>
+        
+        <input type="text" id="searchInput" placeholder="Search for food...">
+        <button onclick="searchMenu()">Search</button>
+    </div>
+
+
+   <table id="menuTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody id="menuTableBody">
+        </tbody>
+    </table>
+
+    <script>
+        async function loadMenu(){
+            const response = await fetch("api/menu");
+            const menu = await response.json();
+
+            const tableBody = document.getElementById("menuTableBody");
+            
+            tableBody.innerHTML = "";
+
+            menu.forEach(m => {
+                const row = document.createElement("tr");
+
+                const idCell = document.createElement("td");
+                idCell.textContent = m.id;
+
+                const nameCell = document.createElement("td");
+                nameCell.textContent = m.name;
+
+                const priceCell = document.createElement("td");
+                priceCell.textContent = m.price;
+
+                row.appendChild(idCell);
+                row.appendChild(nameCell);
+                row.appendChild(priceCell);
+
+                tableBody.appendChild(row);
+            });
+        };
+        
+        async function searchMenu(){
+            const searchInput = document.getElementById("searchInput").value;
+            const tableBody = document.getElementById("menuTableBody");
+
+            if (!searchInput){
+                loadMenu();
+                return;
+            }
+
+            const response = await fetch(`api/menu/${searchInput}`);
+
+            tableBody.innerHTML = "";
+
+            if (response.status === 404){
+                const row = document.createElement("tr");
+                const notFoundCell = document.createElement("td");
+                notFoundCell.colSpan = 3; 
+                notFoundCell.textContent = "Food not found";
+                row.appendChild(notFoundCell);
+                tableBody.appendChild(row);
+                return;
+            }
+
+            const item = await response.json();
+
+            const row = document.createElement("tr");
+
+            const idCell = document.createElement("td");
+            idCell.textContent = item.id;
+
+            const nameCell = document.createElement("td");
+            nameCell.textContent = item.name;
+
+            const priceCell = document.createElement("td");
+            priceCell.textContent = item.price;
+
+            row.appendChild(idCell);
+            row.appendChild(nameCell);
+            row.appendChild(priceCell);
+
+            tableBody.appendChild(row);
+        }
+
+        
+    </script>
+
+
+</body>
+</html>
